@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出荷QR照合システム</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+    h1 {
+      background: #333;
+      color: white;
+      padding: 10px;
+    }
+    .scanner-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px;
+    }
+    .scanner {
+      width: 45%;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .ok { color: green; }
+    .ng { color: red; }
+  </style>
+</head>
+<body>
+  <h1>📦 出荷QR照合システム</h1>
+
+  <div class="scanner-container">
+    <div class="scanner">
+      <h3>手元リストQR（D列）</h3>
+      <div id="scanner-dqr" style="width:100%;"></div>
+    </div>
+    <div class="scanner">
+      <h3>製品貼付QR（E列）</h3>
+      <div id="scanner-productqr" style="width:100%;"></div>
+    </div>
+  </div>
+
+  <div id="result">QRをスキャンしてください</div>
+
+  <script>
+    let dqr = null;
+    let productqr = null;
+
+    function checkMatch() {
+      if (dqr && productqr) {
+        // POST送信（Apps Script側に照合依頼）
+        fetch("https://script.google.com/macros/s/AKfycbxlevp7FbOZzjkYzBfawcXEI0fYwXZCSHGP1jf-ad6x0_c9-BdYiVZJihhEcuzkJvqNHg/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `dqr=${encodeURIComponent(dqr)}&productqr=${encodeURIComponent(productqr)}`
+        })
+        .then(res => res.text())
+        .then(result => {
+          const resultBox = document.getElementById("result");
+          resultBox.textContent = result;
+          resultBox.className = result.includes("OK") ? "ok" : "ng";
+
+          // 3秒後にリセット
+          setTimeout(() => {
+            dqr = null;
+            productqr = null;
+            resultBox.textContent = "QRをスキャンしてください";
+            resultBox.className = "";
+          }, 3000);
+        });
+      }
+    }
+
+    const dqrScanner = new Html5Qrcode("scanner-dqr");
+    dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 },
+      qr => {
+        dqr = qr;
+        dqrScanner.stop();
+        checkMatch();
+      });
+
+    const productScanner = new Html5Qrcode("scanner-productqr");
+    productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 },
+      qr => {
+        productqr = qr;
+        productScanner.stop();
+        checkMatch();
+      });
+  </script>
+</body>
+</html>
