@@ -27,7 +27,7 @@ function startRightScanner() {
 
 function checkMatch() {
   if (dqr && productqr) {
-    fetch("https://script.google.com/macros/s/AKfycbw7hTWLUSc9d6R3hU1cEr8BuGuqjT-LpW2Dknn0eimqAU5k0Ohtd3as5FUHGExDuwtwag/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbzE3sJti0Uco8TOez-y9DN2xvX7H--7BaYZJ8_9mtxAD7wPeIVw-DDM_Ix-aCZBev9x9w/exec", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
@@ -49,5 +49,6 @@ function checkMatch() {
     });
   }
 }
+
 
 
