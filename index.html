@@ -57,6 +57,23 @@
     let dqr = null;
     let productqr = null;
 
+    const dqrScanner = new Html5Qrcode("scanner-dqr");
+    const productScanner = new Html5Qrcode("scanner-productqr");
+
+    function startScanners() {
+      dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+        dqr = qr;
+        dqrScanner.stop();
+        checkMatch();
+      });
+
+      productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+        productqr = qr;
+        productScanner.stop();
+        checkMatch();
+      });
+    }
+
     function checkMatch() {
       if (dqr && productqr) {
         fetch("https://script.google.com/macros/s/AKfycbz1p34F3mNIE0-1iFP0N1GAf3Qujsqded31x2cw87Pyl1FHdWCLtpDyDH2Dy0ikIu5FPA/exec", {
@@ -70,41 +87,20 @@
           resultBox.textContent = result;
           resultBox.className = result.includes("OK") ? "ok" : "ng";
 
-          // 3秒後にリセット
+          // 3秒後にリセット＆再スキャン
           setTimeout(() => {
             dqr = null;
             productqr = null;
             resultBox.textContent = "QRをスキャンしてください";
             resultBox.className = "";
-
-            // 再スキャン開始
-            dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-              dqr = qr;
-              dqrScanner.stop();
-            });
-
-            productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-              productqr = qr;
-              productScanner.stop();
-              checkMatch();
-            });
+            startScanners();
           }, 3000);
         });
       }
     }
 
-    const dqrScanner = new Html5Qrcode("scanner-dqr");
-    dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-      dqr = qr;
-      dqrScanner.stop();
-    });
-
-    const productScanner = new Html5Qrcode("scanner-productqr");
-    productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-      productqr = qr;
-      productScanner.stop();
-      checkMatch();
-    });
+    // 初回起動
+    startScanners();
   </script>
 </body>
 </html>
