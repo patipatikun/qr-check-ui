@@ -60,7 +60,7 @@
     function checkMatch() {
       if (dqr && productqr) {
         // POST送信（Apps Script側に照合依頼）
-        fetch("https://script.google.com/macros/s/AKfycbxlevp7FbOZzjkYzBfawcXEI0fYwXZCSHGP1jf-ad6x0_c9-BdYiVZJihhEcuzkJvqNHg/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbwkCSc382VVEETMWFheV3-CatmJBW5xOnuVdV78Jn9xWTWjc1lJmRLZaMWSMPhhmpQkIA/exec", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: `dqr=${encodeURIComponent(dqr)}&productqr=${encodeURIComponent(productqr)}`
@@ -100,3 +100,4 @@
   </script>
 </body>
 </html>
+
