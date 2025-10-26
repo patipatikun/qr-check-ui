@@ -59,11 +59,10 @@
 
     function checkMatch() {
       if (dqr && productqr) {
-        // POST送信（Apps Script側に照合依頼）
         fetch("https://script.google.com/macros/s/AKfycbz1p34F3mNIE0-1iFP0N1GAf3Qujsqded31x2cw87Pyl1FHdWCLtpDyDH2Dy0ikIu5FPA/exec", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `dqr=${encodeURIComponent(dqr)}&productqr=${encodeURIComponent(productqr)}`
+          body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
         })
         .then(res => res.text())
         .then(result => {
@@ -77,28 +76,35 @@
             productqr = null;
             resultBox.textContent = "QRをスキャンしてください";
             resultBox.className = "";
+
+            // 再スキャン開始
+            dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+              dqr = qr;
+              dqrScanner.stop();
+            });
+
+            productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+              productqr = qr;
+              productScanner.stop();
+              checkMatch();
+            });
           }, 3000);
         });
       }
     }
 
     const dqrScanner = new Html5Qrcode("scanner-dqr");
-    dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 },
-      qr => {
-        dqr = qr;
-        dqrScanner.stop();
-        checkMatch();
-      });
+    dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+      dqr = qr;
+      dqrScanner.stop();
+    });
 
     const productScanner = new Html5Qrcode("scanner-productqr");
-    productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 },
-      qr => {
-        productqr = qr;
-        productScanner.stop();
-        checkMatch();
-      });
+    productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+      productqr = qr;
+      productScanner.stop();
+      checkMatch();
+    });
   </script>
 </body>
 </html>
-
-
