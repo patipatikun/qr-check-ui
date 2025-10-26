@@ -60,13 +60,21 @@
     const dqrScanner = new Html5Qrcode("scanner-dqr");
     const productScanner = new Html5Qrcode("scanner-productqr");
 
-    function startScanners() {
+    function startLeftScanner() {
       dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
         dqr = qr;
         dqrScanner.stop();
-        checkMatch();
-      });
 
+        document.getElementById("result").textContent = "左QR読み取り完了。右QRをスキャンしてください（10秒以内）";
+
+        // 10秒後に右スキャナー起動
+        setTimeout(() => {
+          startRightScanner();
+        }, 10000);
+      });
+    }
+
+    function startRightScanner() {
       productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
         productqr = qr;
         productScanner.stop();
@@ -87,20 +95,20 @@
           resultBox.textContent = result;
           resultBox.className = result.includes("OK") ? "ok" : "ng";
 
-          // 3秒後にリセット＆再スキャン
+          // 3秒後にリセット＆左スキャナー再起動
           setTimeout(() => {
             dqr = null;
             productqr = null;
             resultBox.textContent = "QRをスキャンしてください";
             resultBox.className = "";
-            startScanners();
+            startLeftScanner();
           }, 3000);
         });
       }
     }
 
-    // 初回起動
-    startScanners();
+    // 初回起動：左QRスキャナーのみ
+    startLeftScanner();
   </script>
 </body>
 </html>
