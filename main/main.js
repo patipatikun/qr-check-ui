@@ -50,5 +50,5 @@ function checkMatch() {
   }
 }
 
-// 初回起動
+// ✅ 初回起動
 startLeftScanner();
