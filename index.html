@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR照合UI</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -53,7 +53,8 @@
 
   <div id="result">QRをスキャンしてください</div>
 
-  <!-- ✅ キャッシュ回避のために ?v=20251027 を追加 -->
+  <!-- ✅ スクリプトは順番が大事！ -->
   <script src="main.js?v=20251027"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </body>
 </html>
