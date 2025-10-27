@@ -1,54 +1,113 @@
-let dqr = null;
-let productqr = null;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>QR照合UI</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    h1 {
+      background: #333;
+      color: white;
+      padding: 10px;
+    }
+    .scanner-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin: 20px;
+    }
+    .scanner {
+      width: 45%;
+      min-width: 300px;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .ok { color: green; }
+    .ng { color: red; }
+  </style>
+</head>
+<body>
+  <h1>📦 QR照合UI</h1>
 
-const dqrScanner = new Html5Qrcode("scanner-dqr");
-const productScanner = new Html5Qrcode("scanner-productqr");
+  <div class="scanner-container">
+    <div class="scanner">
+      <h3>手元リストQR（D列）</h3>
+      <div id="scanner-dqr"></div>
+    </div>
+    <div class="scanner">
+      <h3>製品貼付QR（E列）</h3>
+      <div id="scanner-productqr"></div>
+    </div>
+  </div>
 
-function startLeftScanner() {
-  dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-    dqr = qr;
-    dqrScanner.stop();
+  <div id="result">QRをスキャンしてください</div>
 
-    document.getElementById("result").textContent = "左QR読み取り完了。右QRをスキャンしてください（10秒以内）";
+  <script>
+    let dqr = null;
+    let productqr = null;
 
-    setTimeout(() => {
-      startRightScanner();
-    }, 10000);
-  }).catch(err => console.error("左スキャナー起動失敗:", err));
-}
+    const dqrScanner = new Html5Qrcode("scanner-dqr");
+    const productScanner = new Html5Qrcode("scanner-productqr");
 
-function startRightScanner() {
-  productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
-    productqr = qr;
-    productScanner.stop();
-    checkMatch();
-  }).catch(err => console.error("右スキャナー起動失敗:", err));
-}
+    function startLeftScanner() {
+      dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+        dqr = qr;
+        dqrScanner.stop();
 
-function checkMatch() {
-  if (dqr && productqr) {
-    fetch("https://script.google.com/macros/s/AKfycbzE3sJti0Uco8TOez-y9DN2xvX7H--7BaYZJ8_9mtxAD7wPeIVw-DDM_Ix-aCZBev9x9w/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
-    })
-    .then(res => res.text())
-    .then(result => {
-      const resultBox = document.getElementById("result");
-      resultBox.textContent = result;
-      resultBox.className = result.includes("OK") ? "ok" : "ng";
+        document.getElementById("result").textContent = "左QR読み取り完了。右QRをスキャンしてください（10秒以内）";
 
-      setTimeout(() => {
-        dqr = null;
-        productqr = null;
-        resultBox.textContent = "QRをスキャンしてください";
-        resultBox.className = "";
+        setTimeout(() => {
+          startRightScanner();
+        }, 10000);
+      }).catch(err => console.error("左スキャナー起動失敗:", err));
+    }
 
-        startLeftScanner(); // ← ここで左スキャナーを再起動
-      }, 3000);
-    });
-  }
-}
+    function startRightScanner() {
+      productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+        productqr = qr;
+        productScanner.stop();
+        checkMatch();
+      }).catch(err => console.error("右スキャナー起動失敗:", err));
+    }
 
+    function checkMatch() {
+      if (dqr && productqr) {
+        fetch("https://script.google.com/macros/s/AKfycbzE3sJti0Uco8TOez-y9DN2xvX7H--7BaYZJ8_9mtxAD7wPeIVw-DDM_Ix-aCZBev9x9w/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
+        })
+        .then(res => res.text())
+        .then(result => {
+          const resultBox = document.getElementById("result");
+          resultBox.textContent = result;
+          resultBox.className = result.includes("OK") ? "ok" : "ng";
 
+          setTimeout(() => {
+            dqr = null;
+            productqr = null;
+            resultBox.textContent = "QRをスキャンしてください";
+            resultBox.className = "";
 
+            startLeftScanner();
+          }, 3000);
+        });
+      }
+    }
+
+    // 初回起動
+    startLeftScanner();
+  </script>
+</body>
+</html>
