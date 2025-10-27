@@ -27,7 +27,7 @@ function startRightScanner() {
 
 function checkMatch() {
   if (dqr && productqr) {
-    fetch("https://script.google.com/macros/s/AKfycbx5BbIO0OkRXBXUfYcqu5LHW2l5nIK009Ry60GT-GarF4m7kMsGB464cFXmvcHpwUs0Og/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbzAfRJoFs9hy0-jw8GcY0egwmjA9dlE6WSXCVdMOiJcs44DnBPHpGmFaEw6FD_ZyVE-LA/exec", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
