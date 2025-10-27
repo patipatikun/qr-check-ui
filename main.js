@@ -5,20 +5,20 @@ const dqrScanner = new Html5Qrcode("scanner-dqr");
 const productScanner = new Html5Qrcode("scanner-productqr");
 
 function startLeftScanner() {
-  dqrScanner.start({ facingMode: "environment" }, { fps: 1, qrbox: 150 }, qr => {
+  dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
     dqr = qr;
     dqrScanner.stop();
 
-    document.getElementById("result").textContent = "1回目QR読み取り完了。2回目をスキャンしてください（10秒以内）";
+    document.getElementById("result").textContent = "1回目QR読み取り完了。2回目をスキャンしてください（2秒以内）";
 
     setTimeout(() => {
       startRightScanner();
-    }, 3000);
+    }, 2000); // ✅ 待ち時間を2秒に変更
   }).catch(err => console.error("左スキャナー起動失敗:", err));
 }
 
 function startRightScanner() {
-  productScanner.start({ facingMode: "environment" }, { fps: 1, qrbox: 150 }, qr => {
+  productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
     productqr = qr;
     productScanner.stop();
     checkMatch();
