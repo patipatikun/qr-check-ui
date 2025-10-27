@@ -5,7 +5,7 @@ const dqrScanner = new Html5Qrcode("scanner-dqr");
 const productScanner = new Html5Qrcode("scanner-productqr");
 
 function startLeftScanner() {
-  dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+  dqrScanner.start({ facingMode: "environment" }, { fps: 1, qrbox: 150 }, qr => {
     dqr = qr;
     dqrScanner.stop();
 
@@ -18,7 +18,7 @@ function startLeftScanner() {
 }
 
 function startRightScanner() {
-  productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+  productScanner.start({ facingMode: "environment" }, { fps: 1, qrbox: 150 }, qr => {
     productqr = qr;
     productScanner.stop();
     checkMatch();
