@@ -3,7 +3,8 @@ const html5QrCode = new Html5Qrcode("reader");
 // ✅ カメラだけ起動（読み取りはまだしない）
 html5QrCode.start({ facingMode: "environment" }, {
   fps: 10,
-  qrbox: { width: 250, height: 250 }
+  qrbox: { width: 250, height: 250 }, // ✅ 正方形に固定
+  aspectRatio: 1.0 // ✅ 正方形を維持
 }, () => {}, () => {})
 .catch(err => {
   document.getElementById("result").textContent = "❌ カメラ起動失敗";
