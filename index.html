@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QR読み取りUI</title>
   <style>
     body {
@@ -50,7 +50,7 @@
     #startScan {
       font-size: 1.4em;
       padding: 14px 28px;
-      margin: 10px auto 20px auto;
+      margin: 10px auto 5px auto;
       background-color: #0078d4;
       color: white;
       border: none;
@@ -62,6 +62,22 @@
     }
     #startScan:hover {
       background-color: #005ea2;
+    }
+    #startCamera {
+      font-size: 1.2em;
+      padding: 12px 24px;
+      margin: 0 auto 20px auto;
+      background-color: #00a859;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      position: relative;
+      z-index: 10;
+    }
+    #startCamera:hover {
+      background-color: #007a43;
     }
     #result {
       font-size: 1.2em;
@@ -81,7 +97,8 @@
     <div id="overlay">🔍 読み取り中...</div>
   </div>
 
-  <button id="startScan">📡 このQRを読み取る</button>
+  <button id="startScan">📷 読み取り開始</button>
+  <button id="startCamera">📡 カメラ起動</button>
   <div id="result"></div>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
