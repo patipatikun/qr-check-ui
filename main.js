@@ -3,19 +3,24 @@ const overlay = document.getElementById("overlay");
 const resultBox = document.getElementById("result");
 let scanning = false;
 
-// ✅ カメラ起動ボタンで start() 実行
+// 📡 カメラ起動ボタン
 document.getElementById("startCamera").addEventListener("click", () => {
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: { width: 250, height: 250 },
+    qrbox: function(w, h) {
+      const size = Math.min(w, h) * 0.8;
+      return { width: size, height: size };
+    },
     aspectRatio: 1.0
-  }, () => {}, () => {}).catch(err => {
+  }, () => {
+    console.log("✅ カメラ起動完了");
+  }, error => {
+    console.warn("❌ カメラ起動エラー:", error);
     resultBox.textContent = "❌ カメラ起動失敗";
-    console.error("カメラ起動エラー:", err);
   });
 });
 
-// ✅ 読み取りボタンで読み取り処理
+// 📷 読み取り開始ボタン
 document.getElementById("startScan").addEventListener("click", () => {
   if (scanning) return;
   scanning = true;
@@ -25,15 +30,19 @@ document.getElementById("startScan").addEventListener("click", () => {
 
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: { width: 250, height: 250 },
+    qrbox: function(w, h) {
+      const size = Math.min(w, h) * 0.8;
+      return { width: size, height: size };
+    },
     aspectRatio: 1.0
   }, decodedText => {
+    console.log("✅ 読み取り成功:", decodedText);
     html5QrCode.stop().catch(() => {});
     scanning = false;
     overlay.style.visibility = "hidden";
     resultBox.textContent = `✅ 読み取り成功: ${decodedText}`;
   }, errorMessage => {
-    // 読み取り失敗時のログ（必要なら表示）
+    console.log("❌ 読み取り失敗:", errorMessage);
   });
 
   setTimeout(() => {
