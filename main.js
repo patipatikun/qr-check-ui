@@ -7,11 +7,9 @@ let scanning = false;
 document.getElementById("startCamera").addEventListener("click", () => {
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: function(w, h) {
-      const size = Math.min(w, h) * 0.8;
-      return { width: size, height: size };
-    },
-    aspectRatio: 1.0
+    qrbox: { width: 100, height: 300 },
+    aspectRatio: 1.0,
+    disableFlip: true
   }, () => {
     console.log("✅ カメラ起動完了");
   }, error => {
@@ -30,11 +28,9 @@ document.getElementById("startScan").addEventListener("click", () => {
 
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: function(w, h) {
-      const size = Math.min(w, h) * 0.8;
-      return { width: size, height: size };
-    },
-    aspectRatio: 1.0
+    qrbox: { width: 100, height: 300 },
+    aspectRatio: 1.0,
+    disableFlip: true
   }, decodedText => {
     console.log("✅ 読み取り成功:", decodedText);
     html5QrCode.stop().catch(() => {});
