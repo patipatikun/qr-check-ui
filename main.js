@@ -3,11 +3,13 @@ const overlay = document.getElementById("overlay");
 const resultBox = document.getElementById("result");
 let scanning = false;
 
+console.log("v20251028 - 正方形qrbox関数版");
+
 // ✅ カメラ常時起動（枠は正方形で表示）
 html5QrCode.start({ facingMode: "environment" }, {
   fps: 10,
   qrbox: function(w, h) {
-    const size = Math.min(w, h, 300);
+    const size = Math.min(w, h) * 0.8;
     return { width: size, height: size };
   },
   aspectRatio: 1.0
@@ -27,7 +29,7 @@ document.getElementById("startScan").addEventListener("click", () => {
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
     qrbox: function(w, h) {
-      const size = Math.min(w, h, 300);
+      const size = Math.min(w, h) * 0.8;
       return { width: size, height: size };
     },
     aspectRatio: 1.0
