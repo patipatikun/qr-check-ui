@@ -1,16 +1,14 @@
 const html5QrCode = new Html5Qrcode("reader");
 const overlay = document.getElementById("overlay");
 const resultBox = document.getElementById("result");
-
 let scanning = false;
 
-// ✅ カメラ起動（読み取りはまだしない）
+// ✅ 初期起動ではカメラ表示のみ（読み取りはしない）
 html5QrCode.start({ facingMode: "environment" }, {
   fps: 10,
   qrbox: { width: 250, height: 250 },
   aspectRatio: 1.0
-}, () => {}, () => {})
-.catch(err => {
+}, () => {}, () => {}).catch(err => {
   resultBox.textContent = "❌ カメラ起動失敗";
   console.error("カメラ起動エラー:", err);
 });
