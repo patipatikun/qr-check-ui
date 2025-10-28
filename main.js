@@ -7,7 +7,7 @@ let scanning = false;
 html5QrCode.start({ facingMode: "environment" }, {
   fps: 10,
   qrbox: function(w, h) {
-    const size = Math.min(w, h) * 0.8;
+    const size = Math.min(w, h, 300);
     return { width: size, height: size };
   },
   aspectRatio: 1.0
@@ -27,7 +27,7 @@ document.getElementById("startScan").addEventListener("click", () => {
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
     qrbox: function(w, h) {
-      const size = Math.min(w, h) * 0.8;
+      const size = Math.min(w, h, 300);
       return { width: size, height: size };
     },
     aspectRatio: 1.0
