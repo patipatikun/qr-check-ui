@@ -1,5 +1,6 @@
 let dqr = null;
 let productqr = null;
+let scanning = false;
 
 const dqrScanner = new Html5Qrcode("scanner-dqr");
 const productScanner = new Html5Qrcode("scanner-productqr");
@@ -44,16 +45,23 @@ function checkMatch() {
         resultBox.textContent = "QRをスキャンしてください";
         resultBox.className = "";
 
-        startLeftScanner();
+        if (scanning) startLeftScanner(); // トグルがONなら再スキャン
       }, 3000);
     });
   }
 }
 
-// ✅ 自動起動は止めて、ボタンで起動するように変更
-// startLeftScanner();
-
-// ✅ ボタンで照合モードを起動
+// ✅ トグル式ボタン操作
 document.getElementById("startScan").addEventListener("click", () => {
-  startLeftScanner();
+  scanning = !scanning;
+
+  const btn = document.getElementById("startScan");
+  if (scanning) {
+    btn.textContent = "⏹ 停止";
+    startLeftScanner();
+  } else {
+    btn.textContent = "📷 読み取り開始";
+    dqrScanner.stop().catch(() => {});
+    productScanner.stop().catch(() => {});
+  }
 });
