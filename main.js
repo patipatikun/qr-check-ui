@@ -13,7 +13,7 @@ function startLeftScanner() {
 
     setTimeout(() => {
       startRightScanner();
-    }, 2000); // ✅ 待ち時間を2秒に変更
+    }, 2000);
   }).catch(err => console.error("左スキャナー起動失敗:", err));
 }
 
@@ -50,5 +50,10 @@ function checkMatch() {
   }
 }
 
-// ✅ 初回起動
-startLeftScanner();
+// ✅ 自動起動は止めて、ボタンで起動するように変更
+// startLeftScanner();
+
+// ✅ ボタンで照合モードを起動
+document.getElementById("startScan").addEventListener("click", () => {
+  startLeftScanner();
+});
