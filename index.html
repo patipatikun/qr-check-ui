@@ -18,12 +18,32 @@
       padding: 10px;
       margin: 0;
     }
-    #reader {
+    #reader-container {
+      position: relative;
       width: 300px;
       height: 300px;
       margin: 20px auto 10px auto;
-      position: relative;
+    }
+    #reader {
+      width: 100%;
+      height: 100%;
       z-index: 1;
+    }
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.4);
+      visibility: hidden;
     }
     #startScan {
       font-size: 1.4em;
@@ -36,7 +56,7 @@
       cursor: pointer;
       display: block;
       position: relative;
-      z-index: 10; /* ✅ カメラより前面に */
+      z-index: 10;
     }
     #startScan:hover {
       background-color: #005ea2;
@@ -54,7 +74,11 @@
 <body>
   <h1>📷 QR読み取りUI</h1>
 
-  <div id="reader"></div>
+  <div id="reader-container">
+    <div id="reader"></div>
+    <div id="overlay">🔍 読み取り中...</div>
+  </div>
+
   <button id="startScan">📡 このQRを読み取る</button>
   <div id="result"></div>
 
