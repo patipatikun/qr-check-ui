@@ -7,7 +7,7 @@ let scanning = false;
 document.getElementById("startCamera").addEventListener("click", () => {
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: { width: 100, height: 300 },
+    qrbox: { width: 200, height: 300 },
     aspectRatio: 1.0,
     disableFlip: true
   }, () => {
@@ -28,7 +28,7 @@ document.getElementById("startScan").addEventListener("click", () => {
 
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: { width: 100, height: 300 },
+    qrbox: { width: 200, height: 300 },
     aspectRatio: 1.0,
     disableFlip: true
   }, decodedText => {
