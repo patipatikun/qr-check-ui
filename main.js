@@ -3,10 +3,13 @@ const overlay = document.getElementById("overlay");
 const resultBox = document.getElementById("result");
 let scanning = false;
 
-// ✅ 初期起動ではカメラ表示のみ（読み取りはしない）
+// ✅ カメラ常時起動（枠は正方形で表示）
 html5QrCode.start({ facingMode: "environment" }, {
   fps: 10,
-  qrbox: { width: 250, height: 250 },
+  qrbox: function(w, h) {
+    const size = Math.min(w, h) * 0.8;
+    return { width: size, height: size };
+  },
   aspectRatio: 1.0
 }, () => {}, () => {}).catch(err => {
   resultBox.textContent = "❌ カメラ起動失敗";
@@ -23,7 +26,10 @@ document.getElementById("startScan").addEventListener("click", () => {
 
   html5QrCode.start({ facingMode: "environment" }, {
     fps: 10,
-    qrbox: { width: 250, height: 250 },
+    qrbox: function(w, h) {
+      const size = Math.min(w, h) * 0.8;
+      return { width: size, height: size };
+    },
     aspectRatio: 1.0
   }, decodedText => {
     html5QrCode.stop().catch(() => {});
