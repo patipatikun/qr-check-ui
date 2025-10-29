@@ -1,79 +1,77 @@
 let dqr = null;
 let productqr = null;
 
-// Html5QrcodeインスタンスはHTML要素IDに紐づいています
+// Html5Qrcodeのインスタンスを作成
 const dqrScanner = new Html5Qrcode("scanner-dqr");
 const productScanner = new Html5Qrcode("scanner-productqr");
 
-// HTML要素の参照
+// DOM要素の取得
 const resultBox = document.getElementById("result");
 const btnStart1 = document.getElementById("start-scan-1");
 const btnStart2 = document.getElementById("start-scan-2");
-const scannerDqrEl = document.getElementById("scanner-dqr");
-const scannerProductQrEl = document.getElementById("scanner-productqr");
+
+const SCAN_BOX_SIZE = 100; // ✅ スキャン枠のサイズを小さく設定 (誤読込防止)
 
 // --- スキャナーの関数 ---
 
-// 1回目のスキャンを開始
+/**
+ * 1回目のQRコードスキャン（製品貼付QR）を開始する
+ */
 function startLeftScanner() {
-  // 1回目スキャナーの領域を表示 (もし非表示にしていた場合)
-  // scannerDqrEl.style.display = "block"; // 必要に応じて
+  resultBox.textContent = "1回目スキャン中...枠内にQRコードを合わせてください";
   
-  resultBox.textContent = "1回目 (製品QR) をスキャン中です...";
-  
-  // スキャナーを起動
   dqrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 200 }, // qrboxを少し大きくして狙いやすく
+    { facingMode: "environment" }, 
+    { fps: 10, qrbox: SCAN_BOX_SIZE }, // ✅ 小さなスキャン枠を設定
     qr => {
+      // 読み取り成功
       dqr = qr;
-      dqrScanner.stop();
-      
-      // scannerDqrEl.style.display = "none"; // 停止後に非表示に
-      
-      resultBox.textContent = "✅ 1回目QR読み取り完了。2回目のスキャンボタンを押してください。";
-
-      // 1回目スキャンボタンを非表示、2回目スキャンボタンを表示・有効化
-      btnStart1.style.display = "none";
-      btnStart2.style.display = "block";
-      btnStart2.disabled = false;
+      dqrScanner.stop().then(() => {
+        resultBox.textContent = "1回目QR読み取り完了。2回目をスキャンしてください";
+        
+        // 1回目スキャンボタンを非表示、2回目スキャンボタンを表示
+        btnStart1.style.display = "none";
+        btnStart2.style.display = "block";
+        btnStart2.disabled = false; // 2回目ボタンを有効化
+      });
     }
   ).catch(err => {
     console.error("左スキャナー起動失敗:", err);
-    resultBox.textContent = "❌ 1回目スキャナー起動失敗。再試行してください。";
+    resultBox.textContent = "エラー: 1回目スキャナー起動失敗。カメラ権限を確認してください。";
     btnStart1.disabled = false; // エラー時はボタンを再有効化
   });
 }
 
-// 2回目のスキャンを開始
+/**
+ * 2回目のQRコードスキャン（出荷時QR）を開始する
+ */
 function startRightScanner() {
-  // 2回目スキャナーの領域を表示 (もし非表示にしていた場合)
-  // scannerProductQrEl.style.display = "block"; // 必要に応じて
+  resultBox.textContent = "2回目スキャン中...枠内にQRコードを合わせてください";
   
-  resultBox.textContent = "2回目 (出荷時QR) をスキャン中です...";
-
-  // スキャナーを起動
   productScanner.start(
     { facingMode: "environment" }, 
-    { fps: 10, qrbox: 200 }, 
+    { fps: 10, qrbox: SCAN_BOX_SIZE }, // ✅ 小さなスキャン枠を設定
     qr => {
+      // 読み取り成功
       productqr = qr;
-      productScanner.stop();
-      // scannerProductQrEl.style.display = "none"; // 停止後に非表示に
-      checkMatch();
+      productScanner.stop().then(() => {
+        checkMatch();
+      });
     }
   ).catch(err => {
     console.error("右スキャナー起動失敗:", err);
-    resultBox.textContent = "❌ 2回目スキャナー起動失敗。再試行してください。";
+    resultBox.textContent = "エラー: 2回目スキャナー起動失敗。";
     btnStart2.disabled = false; // エラー時はボタンを再有効化
   });
 }
 
-// 読み取り結果をチェック
+/**
+ * 2つのQRコードをサーバーに送信して照合する
+ */
 function checkMatch() {
-  // ボタンを無効化し、ユーザーに待機を促す
-  btnStart2.disabled = true;
-  resultBox.textContent = "照合結果を確認中です...";
+  // 2回目スキャンボタンを無効化し、ユーザーに待機を促す
+  btnStart2.disabled = true; 
+  resultBox.textContent = "照合中...";
   resultBox.className = "";
 
   if (dqr && productqr) {
@@ -85,25 +83,23 @@ function checkMatch() {
     .then(res => res.text())
     .then(result => {
       resultBox.textContent = result;
+      // サーバーからのレスポンスに応じて結果の色を変更
       resultBox.className = result.includes("OK") ? "ok" : "ng";
 
       setTimeout(resetApp, 3000); // 3秒後にリセット
     })
     .catch(err => {
         console.error("Fetchエラー:", err);
-        resultBox.textContent = "❌ 通信エラーが発生しました。";
+        resultBox.textContent = "エラー: サーバーとの通信に失敗しました。";
         resultBox.className = "ng";
         setTimeout(resetApp, 3000); // エラー時もリセット
     });
-  } else {
-      // 本来は到達しないはずだが、念のため
-      resultBox.textContent = "❌ 必要なQRデータが揃っていません。";
-      resultBox.className = "ng";
-      setTimeout(resetApp, 3000); 
   }
 }
 
-// アプリケーションの状態をリセット
+/**
+ * アプリケーションの状態を初期状態にリセットする
+ */
 function resetApp() {
   dqr = null;
   productqr = null;
@@ -115,17 +111,15 @@ function resetApp() {
   btnStart1.style.display = "block";
   btnStart1.disabled = false;
   btnStart2.style.display = "none";
-  btnStart2.disabled = true; // 初期状態では無効
-  
-  // 必要に応じてスキャナーの表示もリセット (今回は非表示にしない)
+  btnStart2.disabled = true; // 初期状態では2回目ボタンは無効
 }
 
 
-// --- イベントリスナーの設定 ---
+// --- イベントリスナーの設定 (メインロジック) ---
 
 // 1回目スキャン開始ボタン
 btnStart1.addEventListener("click", () => {
-  btnStart1.disabled = true; // ボタンを無効化
+  btnStart1.disabled = true; // ボタンを無効化し、重複クリックを防ぐ
   startLeftScanner();
 });
 
@@ -135,5 +129,5 @@ btnStart2.addEventListener("click", () => {
   startRightScanner();
 });
 
-// ✅ 初回起動：リセット関数を呼び出して初期状態に設定
+// アプリケーションの初回起動
 resetApp();
