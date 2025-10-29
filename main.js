@@ -29,11 +29,9 @@ function displayQrText(scannerId, text) {
     
     // 8文字に制限する
     if (displayText.length > MAX_TEXT_LENGTH) {
-        // 8文字まで切り詰め、末尾に「...」を付与
         displayText = displayText.substring(0, MAX_TEXT_LENGTH) + '...'; 
     }
     
-    // スキャナーエリアに文字情報を表示する
     el.innerHTML = `<div style="
         font-size: 1.5em; 
         font-weight: bold; 
@@ -55,6 +53,20 @@ function clearScannerArea(scannerId) {
     document.getElementById(scannerId).innerHTML = '';
 }
 
+/**
+ * スキャナーが動いていれば停止させる
+ * @param {Html5Qrcode} scanner - スキャナーインスタンス
+ */
+async function stopScannerIfRunning(scanner) {
+    // isScanning プロパティは推奨されていないため、例外処理で対応
+    try {
+        await scanner.stop();
+    } catch (err) {
+        // スキャナーが既に停止している、またはエラーで起動しなかった場合は無視
+        console.warn("スキャナー停止時にエラー発生（無視）:", err);
+    }
+}
+
 
 // --- メインロジック関数 ---
 
@@ -63,7 +75,7 @@ function clearScannerArea(scannerId) {
  */
 function startLeftScanner() {
     resultBox.textContent = "1回目スキャン中...枠内にQRコードを合わせてください";
-    clearScannerArea(SCANNER_ID_RIGHT); // 2回目エリアをクリア
+    clearScannerArea(SCANNER_ID_RIGHT);
 
     dqrScanner.start(
         { facingMode: "environment" }, 
@@ -72,12 +84,10 @@ function startLeftScanner() {
             // 読み取り成功
             dqr = qr;
             dqrScanner.stop().then(() => {
-                // 読み取った文字情報を表示
                 displayQrText(SCANNER_ID_LEFT, dqr); 
                 
                 resultBox.textContent = "1回目QR読み取り完了。2回目スキャン開始ボタンを押してください。";
                 
-                // 1回目スキャンボタンを非表示、2回目スキャンボタンを表示
                 btnStart1.style.display = "none";
                 btnStart2.style.display = "block";
                 btnStart2.disabled = false;
@@ -87,6 +97,8 @@ function startLeftScanner() {
         console.error("左スキャナー起動失敗:", err);
         resultBox.textContent = "エラー: 1回目スキャナー起動失敗。カメラ権限を確認してください。";
         btnStart1.disabled = false;
+        // エラー時もカメラリソースを確実に解放する
+        stopScannerIfRunning(dqrScanner).then(() => resetApp(false)); 
     });
 }
 
@@ -96,24 +108,28 @@ function startLeftScanner() {
 function startRightScanner() {
     resultBox.textContent = "2回目スキャン中...枠内にQRコードを合わせてください";
     
-    productScanner.start(
-        { facingMode: "environment" }, 
-        { fps: 10, qrbox: SCAN_BOX_SIZE },
-        qr => {
-            // 読み取り成功
-            productqr = qr;
-            
-            // 読み取った文字情報を表示
-            displayQrText(SCANNER_ID_RIGHT, productqr);
-
-            productScanner.stop().then(() => {
-                checkMatch();
-            });
-        }
-    ).catch(err => {
-        console.error("右スキャナー起動失敗:", err);
-        resultBox.textContent = "エラー: 2回目スキャナー起動失敗。";
-        btnStart2.disabled = false;
+    // 2回目起動前に、念のため1回目スキャナーが停止していることを確認（二重起動防止）
+    stopScannerIfRunning(dqrScanner).then(() => {
+        productScanner.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: SCAN_BOX_SIZE },
+            qr => {
+                // 読み取り成功
+                productqr = qr;
+                
+                // ✅ 停止処理が完了してから次の処理へ進む
+                productScanner.stop().then(() => { 
+                    displayQrText(SCANNER_ID_RIGHT, productqr);
+                    checkMatch();
+                });
+            }
+        ).catch(err => {
+            console.error("右スキャナー起動失敗:", err);
+            resultBox.textContent = "エラー: 2回目スキャナー起動失敗。";
+            btnStart2.disabled = false;
+            // エラー時もカメラリソースを確実に解放する
+            stopScannerIfRunning(productScanner).then(() => resetApp(false));
+        });
     });
 }
 
@@ -136,7 +152,6 @@ function checkMatch() {
             resultBox.textContent = result;
             resultBox.className = result.includes("OK") ? "ok" : "ng";
 
-            // ✅ 照合結果表示後、3秒後にリセットを実行
             setTimeout(resetApp, 3000); 
         })
         .catch(err => {
@@ -144,7 +159,6 @@ function checkMatch() {
             resultBox.textContent = "エラー: サーバーとの通信に失敗しました。リセットします。";
             resultBox.className = "ng";
             
-            // ✅ 通信エラー発生時も3秒後にリセットを実行
             setTimeout(resetApp, 3000);
         });
     }
@@ -157,22 +171,22 @@ function resetApp() {
     dqr = null;
     productqr = null;
     
-    // スキャナーが動いていたら停止させる
-    dqrScanner.stop().catch(() => {});
-    productScanner.stop().catch(() => {});
-    
-    resultBox.textContent = "QRをスキャンしてください";
-    resultBox.className = "";
-    
-    // スキャナーエリアの表示をクリア
-    clearScannerArea(SCANNER_ID_LEFT);
-    clearScannerArea(SCANNER_ID_RIGHT);
-    
-    // ボタンを初期状態に戻す
-    btnStart1.style.display = "block";
-    btnStart1.disabled = false;
-    btnStart2.style.display = "none";
-    btnStart2.disabled = true;
+    // すべてのスキャナーの停止を待ってからDOMを更新する
+    Promise.all([
+        stopScannerIfRunning(dqrScanner),
+        stopScannerIfRunning(productScanner)
+    ]).then(() => {
+        resultBox.textContent = "QRをスキャンしてください";
+        resultBox.className = "";
+        
+        clearScannerArea(SCANNER_ID_LEFT);
+        clearScannerArea(SCANNER_ID_RIGHT);
+        
+        btnStart1.style.display = "block";
+        btnStart1.disabled = false;
+        btnStart2.style.display = "none";
+        btnStart2.disabled = true;
+    });
 }
 
 
