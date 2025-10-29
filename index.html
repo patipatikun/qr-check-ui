@@ -47,34 +47,26 @@
       background-color: rgba(0, 0, 0, 0.4);
       visibility: hidden;
     }
-    #startScan {
+    #startScan, #startCamera {
       font-size: 1.4em;
       padding: 14px 28px;
-      margin: 10px auto 5px auto;
-      background-color: #0078d4;
-      color: white;
+      margin: 10px auto;
       border: none;
       border-radius: 8px;
+      color: white;
       cursor: pointer;
       display: block;
       position: relative;
       z-index: 10;
+    }
+    #startScan {
+      background-color: #0078d4;
     }
     #startScan:hover {
       background-color: #005ea2;
     }
     #startCamera {
-      font-size: 1.2em;
-      padding: 12px 24px;
-      margin: 0 auto 20px auto;
       background-color: #00a859;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: block;
-      position: relative;
-      z-index: 10;
     }
     #startCamera:hover {
       background-color: #007a43;
@@ -99,9 +91,11 @@
 
   <button id="startScan">📷 読み取り開始</button>
   <button id="startCamera">📡 カメラ起動</button>
-  <div id="result"></div>
+  <div id="result">ボタンを押してスキャンを開始してください</div>
 
+  <!-- html5-qrcodeライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="main.js?v=20251028"></script>
+  <!-- 外部JSファイル -->
+  <script src="main.js?v=20251029"></script>
 </body>
 </html>
