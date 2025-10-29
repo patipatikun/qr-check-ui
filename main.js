@@ -1,7 +1,7 @@
 let dqr = null;
 let productqr = null;
 
-const SCAN_BOX_SIZE = 15; // スキャン枠のサイズ (誤読込防止)
+const SCAN_BOX_SIZE = 150; // スキャン枠のサイズ (誤読込防止)
 const SCANNER_ID_LEFT = "scanner-dqr";
 const SCANNER_ID_RIGHT = "scanner-productqr";
 const MAX_TEXT_LENGTH = 10; // 表示する文字の最大長
