@@ -13,7 +13,8 @@ document.getElementById("result").textContent = "1回目QR読み取り完了。2
 
 setTimeout(() => {
 startRightScanner();
-}, 2000); // ✅ 待ち時間を2秒に変更
+    }, 2000); // ✅ 待ち時間を2秒に変更
+    }, 2000);
 }).catch(err => console.error("左スキャナー起動失敗:", err));
 }
 
@@ -27,8 +28,7 @@ checkMatch();
 
 function checkMatch() {
 if (dqr && productqr) {
-    fetch("https://script.google.com/macros/s/AKfycbx5BbIO0OkRXBXUfYcqu5LHW2l5nIK009Ry60GT-GarF4m7kMsGB464cFXmvcHpwUs0Og/exec", {
-    fetch("https://script.google.com/macros/s/AKfycbzAfRJoFs9hy0-jw8GcY0egwmjA9dlE6WSXCVdMOiJcs44DnBPHpGmFaEw6FD_ZyVE-LA/exec", {
+fetch("https://script.google.com/macros/s/AKfycbzAfRJoFs9hy0-jw8GcY0egwmjA9dlE6WSXCVdMOiJcs44DnBPHpGmFaEw6FD_ZyVE-LA/exec", {
 method: "POST",
 headers: { "Content-Type": "application/x-www-form-urlencoded" },
 body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
@@ -53,3 +53,10 @@ startLeftScanner();
 
 // ✅ 初回起動
 startLeftScanner();
+// ✅ 自動起動は止めて、ボタンで起動するように変更
+// startLeftScanner();
+
+// ✅ ボタンで照合モードを起動
+document.getElementById("startScan").addEventListener("click", () => {
+  startLeftScanner();
+});
