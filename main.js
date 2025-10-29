@@ -1,51 +1,55 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const startScanBtn = document.getElementById("startScan");
-  const resultDiv = document.getElementById("result");
-  const overlay = document.getElementById("overlay");
+let dqr = null;
+let productqr = null;
 
-  let html5QrCode = new Html5Qrcode("reader");
-  let cameraId = null;
-  let scanning = false;
+const dqrScanner = new Html5Qrcode("scanner-dqr");
+const productScanner = new Html5Qrcode("scanner-productqr");
 
-  startScanBtn.addEventListener("click", async () => {
-    if (scanning) return;
+function startLeftScanner() {
+dqrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+dqr = qr;
+dqrScanner.stop();
 
-    scanning = true;
-    overlay.style.visibility = "visible";
-    overlay.textContent = "📸 カメラを起動中...";
+document.getElementById("result").textContent = "1回目QR読み取り完了。2回目をスキャンしてください（2秒以内）";
 
-    try {
-      const devices = await Html5Qrcode.getCameras();
-      if (!devices || devices.length === 0) {
-        throw new Error("カメラが検出されません");
-      }
+setTimeout(() => {
+startRightScanner();
+}, 2000); // ✅ 待ち時間を2秒に変更
+}).catch(err => console.error("左スキャナー起動失敗:", err));
+}
 
-      cameraId = devices[0].id;
+function startRightScanner() {
+productScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 150 }, qr => {
+productqr = qr;
+productScanner.stop();
+checkMatch();
+}).catch(err => console.error("右スキャナー起動失敗:", err));
+}
 
-      await html5QrCode.start(
-        cameraId,
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0, // ✅ iPhoneで正方形プレビューを維持
-        },
-        (decodedText) => {
-          overlay.style.visibility = "hidden";
-          resultDiv.textContent = "✅ 読み取り結果: " + decodedText;
+function checkMatch() {
+if (dqr && productqr) {
+    fetch("https://script.google.com/macros/s/AKfycbx5BbIO0OkRXBXUfYcqu5LHW2l5nIK009Ry60GT-GarF4m7kMsGB464cFXmvcHpwUs0Og/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbzAfRJoFs9hy0-jw8GcY0egwmjA9dlE6WSXCVdMOiJcs44DnBPHpGmFaEw6FD_ZyVE-LA/exec", {
+method: "POST",
+headers: { "Content-Type": "application/x-www-form-urlencoded" },
+body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
+})
+.then(res => res.text())
+.then(result => {
+const resultBox = document.getElementById("result");
+resultBox.textContent = result;
+resultBox.className = result.includes("OK") ? "ok" : "ng";
 
-          html5QrCode.stop().catch(console.warn);
-          scanning = false;
-        },
-        (errorMessage) => {
-          // 読み取り失敗時の軽微なエラーは無視
-        }
-      );
+setTimeout(() => {
+dqr = null;
+productqr = null;
+resultBox.textContent = "QRをスキャンしてください";
+resultBox.className = "";
 
-      overlay.textContent = "🔍 QRコードをかざしてください";
-    } catch (err) {
-      console.error("カメラ起動エラー:", err);
-      overlay.textContent = "⚠️ カメラ起動に失敗しました";
-      scanning = false;
-    }
-  });
+startLeftScanner();
+}, 3000);
 });
+}
+}
+
+// ✅ 初回起動
+startLeftScanner();
