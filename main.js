@@ -33,13 +33,14 @@ function displayQrText(scannerId, text) {
         displayText = displayText.substring(0, MAX_TEXT_LENGTH) + '...'; 
     }
     
+    // スキャナーエリアに文字情報を表示する
     el.innerHTML = `<div style="
         font-size: 1.5em; 
         font-weight: bold; 
         color: #333; 
         padding: 20px; 
         text-align: center;
-        background: #e0ffe0; /* 読み取り済みを示す薄い緑 */
+        background: #e0ffe0; 
         border: 2px solid #4CAF50;
         border-radius: 5px;
         margin: 20px 0;
@@ -47,34 +48,11 @@ function displayQrText(scannerId, text) {
 }
 
 /**
- * スキャナーのエリアに代替の枠（エイマー）を表示し、ユーザーに狙いを定めやすくする
- * @param {string} scannerId - スキャナー要素のID
- */
-function showAimerBox(scannerId) {
-    const el = document.getElementById(scannerId);
-    // カメラのプレビューがない状態でも、ユーザーにQRコードを合わせる場所を示す
-    el.innerHTML = `<div style="
-        width: ${SCAN_BOX_SIZE}px; height: ${SCAN_BOX_SIZE}px; 
-        border: 2px dashed #007bff; margin: auto; 
-        display: flex; justify-content: center; align-items: center; 
-        font-size: 0.8em; color: #555;
-    ">QR枠 (${SCAN_BOX_SIZE}x${SCAN_BOX_SIZE})</div>`;
-}
-
-/**
- * スキャナーエリアをクリアする (カメラ起動前やリセット時用)
+ * スキャナーエリアをクリアする (リセット時用)
  * @param {string} scannerId - スキャナー要素のID
  */
 function clearScannerArea(scannerId) {
     document.getElementById(scannerId).innerHTML = '';
-}
-
-/**
- * 全スキャナーエリアにヒント枠を表示する
- */
-function resetAimerBoxes() {
-    showAimerBox(SCANNER_ID_LEFT);
-    clearScannerArea(SCANNER_ID_RIGHT); // 2回目スキャンエリアは最初はクリア（1回目完了時にエイマーを表示するため）
 }
 
 
@@ -85,7 +63,7 @@ function resetAimerBoxes() {
  */
 function startLeftScanner() {
     resultBox.textContent = "1回目スキャン中...枠内にQRコードを合わせてください";
-    clearScannerArea(SCANNER_ID_RIGHT); // 2回目エリアは必ずクリア
+    clearScannerArea(SCANNER_ID_RIGHT); // 2回目エリアをクリア
 
     dqrScanner.start(
         { facingMode: "environment" }, 
@@ -94,7 +72,7 @@ function startLeftScanner() {
             // 読み取り成功
             dqr = qr;
             dqrScanner.stop().then(() => {
-                // ✅ 読み取った文字情報を表示
+                // 読み取った文字情報を表示
                 displayQrText(SCANNER_ID_LEFT, dqr); 
                 
                 resultBox.textContent = "1回目QR読み取り完了。2回目スキャン開始ボタンを押してください。";
@@ -103,16 +81,12 @@ function startLeftScanner() {
                 btnStart1.style.display = "none";
                 btnStart2.style.display = "block";
                 btnStart2.disabled = false;
-                
-                // 2回目のスキャンエリアに照準合わせのヒント枠を表示
-                showAimerBox(SCANNER_ID_RIGHT); 
             });
         }
     ).catch(err => {
         console.error("左スキャナー起動失敗:", err);
         resultBox.textContent = "エラー: 1回目スキャナー起動失敗。カメラ権限を確認してください。";
         btnStart1.disabled = false;
-        resetAimerBoxes(); // エラー時はエイマーを再表示
     });
 }
 
@@ -129,7 +103,7 @@ function startRightScanner() {
             // 読み取り成功
             productqr = qr;
             
-            // ✅ 読み取った文字情報を表示
+            // 読み取った文字情報を表示
             displayQrText(SCANNER_ID_RIGHT, productqr);
 
             productScanner.stop().then(() => {
@@ -140,7 +114,6 @@ function startRightScanner() {
         console.error("右スキャナー起動失敗:", err);
         resultBox.textContent = "エラー: 2回目スキャナー起動失敗。";
         btnStart2.disabled = false;
-        showAimerBox(SCANNER_ID_RIGHT); // エラー時はエイマーを再表示
     });
 }
 
@@ -163,12 +136,15 @@ function checkMatch() {
             resultBox.textContent = result;
             resultBox.className = result.includes("OK") ? "ok" : "ng";
 
-            setTimeout(resetApp, 3000); // 3秒後にリセット
+            // ✅ 照合結果表示後、3秒後にリセットを実行
+            setTimeout(resetApp, 3000); 
         })
         .catch(err => {
             console.error("Fetchエラー:", err);
-            resultBox.textContent = "エラー: サーバーとの通信に失敗しました。";
+            resultBox.textContent = "エラー: サーバーとの通信に失敗しました。リセットします。";
             resultBox.className = "ng";
+            
+            // ✅ 通信エラー発生時も3秒後にリセットを実行
             setTimeout(resetApp, 3000);
         });
     }
@@ -188,14 +164,15 @@ function resetApp() {
     resultBox.textContent = "QRをスキャンしてください";
     resultBox.className = "";
     
+    // スキャナーエリアの表示をクリア
+    clearScannerArea(SCANNER_ID_LEFT);
+    clearScannerArea(SCANNER_ID_RIGHT);
+    
     // ボタンを初期状態に戻す
     btnStart1.style.display = "block";
     btnStart1.disabled = false;
     btnStart2.style.display = "none";
     btnStart2.disabled = true;
-
-    // 照準合わせ用のヒント枠を再表示
-    resetAimerBoxes();
 }
 
 
@@ -203,13 +180,13 @@ function resetApp() {
 
 // 1回目スキャン開始ボタン
 btnStart1.addEventListener("click", () => {
-    btnStart1.disabled = true; // ボタンを無効化し、重複クリックを防ぐ
+    btnStart1.disabled = true; 
     startLeftScanner();
 });
 
 // 2回目スキャン開始ボタン
 btnStart2.addEventListener("click", () => {
-    btnStart2.disabled = true; // ボタンを無効化
+    btnStart2.disabled = true; 
     startRightScanner();
 });
 
