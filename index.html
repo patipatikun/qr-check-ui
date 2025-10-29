@@ -9,77 +9,95 @@
       font-family: sans-serif;
       text-align: center;
       background: #f4f4f4;
-      padding-bottom: 50px; /* ボタンが画面下部に隠れないように */
+      padding-bottom: 50px;
     }
     h1 {
       background: #333;
       color: white;
       padding: 10px;
-      margin: 0 0 20px 0;
     }
     .scanner-container {
       display: flex;
       justify-content: space-around;
       flex-wrap: wrap;
-      margin: 20px;
+      margin: 20px 0;
     }
     .scanner {
       width: 45%;
       min-width: 300px;
-      margin-bottom: 20px; /* スペース調整 */
+      margin-bottom: 20px;
       background: #fff;
-      padding: 15px;
+      padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    /* スキャナー表示エリアの最小高さを設定 */
+    #scanner-dqr, #scanner-productqr {
+      min-height: 200px; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* 結果とボタンのスタイル */
     #result {
       font-size: 1.5em;
-      margin: 20px auto;
-      padding: 15px 30px;
+      margin-top: 20px;
+      padding: 10px;
       background: #fff;
       border-radius: 8px;
-      display: inline-block;
-      min-width: 300px;
-      font-weight: bold;
+      display: block; 
+      width: 80%;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      transition: background-color 0.3s;
     }
-    .ok { color: white; background: #4CAF50 !important; } /* 成功時の色 */
-    .ng { color: white; background: #F44336 !important; } /* 失敗時の色 */
+    .ok { 
+      color: white; 
+      background: #4CAF50 !important; /* OKは緑色 */
+      border: 1px solid #388E3C;
+    } 
+    .ng { 
+      color: white; 
+      background: #F44336 !important; /* NGは赤色 */
+      border: 1px solid #D32F2F;
+    }
 
-    /* 追加したボタンのスタイル */
-    #button-container {
-        margin: 20px auto;
+    button {
+      padding: 12px 25px;
+      font-size: 1.2em;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      background-color: #007bff;
+      transition: background-color 0.3s;
     }
-    .scan-button {
-        padding: 15px 30px;
-        font-size: 1.2em;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-        transition: background 0.3s;
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
     }
-    #start-scan-1 {
-        background-color: #2196F3; /* Blue */
-        color: white;
-    }
-    #start-scan-2 {
-        background-color: #FF9800; /* Orange */
-        color: white;
-    }
-    .scan-button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
+
+    /* モバイル対応 */
+    @media (max-width: 650px) {
+      .scanner {
+        width: 90%;
+      }
+      .scanner-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      button {
+        width: 90%;
+        margin-bottom: 15px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>📦 QR照合UI</h1>
-
-  <div id="result">QRをスキャンしてください</div>
-
-  <div id="button-container">
-    <button id="start-scan-1" class="scan-button">1回目スキャン開始</button>
-    <button id="start-scan-2" class="scan-button" style="display:none;">2回目スキャン開始</button>
-  </div>
 
   <div class="scanner-container">
     <div class="scanner">
@@ -92,7 +110,13 @@
     </div>
   </div>
 
+  <button id="start-scan-1">📷 1回目スキャン開始</button>
+  <button id="start-scan-2" style="display:none;">📷 2回目スキャン開始</button>
+
+  <div id="result">QRをスキャンしてください</div>
+
+
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="main.js?v=20251029"></script>
+<script src="main.js"></script>
 </body>
 </html>
