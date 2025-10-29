@@ -1,57 +1,67 @@
-const startButton = document.getElementById("startButton");
-const resultDiv = document.getElementById("result");
-const readerElem = document.getElementById("reader");
+document.addEventListener("DOMContentLoaded", () => {
+  const startCameraBtn = document.getElementById("startCamera");
+  const startScanBtn = document.getElementById("startScan");
+  const resultDiv = document.getElementById("result");
+  const overlay = document.getElementById("overlay");
+  const readerElem = document.getElementById("reader");
+  let html5QrCode;
+  let cameraId;
+  let isCameraReady = false;
 
-let html5QrCode; // QRコードリーダーオブジェクト
-let scanning = false; // 読み取り中かどうか
+  // カメラ起動
+  startCameraBtn.addEventListener("click", async () => {
+    try {
+      overlay.style.visibility = "visible";
+      overlay.textContent = "📸 カメラを起動中...";
+      html5QrCode = new Html5Qrcode("reader");
 
-startButton.addEventListener("click", async () => {
-  if (scanning) {
-    // 二重起動防止
-    return;
-  }
+      const devices = await Html5Qrcode.getCameras();
+      console.log("検出されたカメラ:", devices);
+      if (devices && devices.length) {
+        cameraId = devices[0].id;
+        await html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          () => {}, // まだ読み取らない
+          () => {}
+        );
+        await html5QrCode.stop();
+        overlay.style.visibility = "hidden";
+        resultDiv.textContent = "✅ カメラ準備完了";
+        isCameraReady = true;
+      } else {
+        overlay.textContent = "❌ カメラが検出できません";
+      }
+    } catch (err) {
+      console.error("カメラ起動エラー:", err);
+      overlay.textContent = "⚠️ カメラ起動に失敗";
+    }
+  });
 
-  try {
-    scanning = true;
-    resultDiv.textContent = "カメラを起動しています...";
-
-    // 既にカメラが存在する場合は停止
-    if (html5QrCode) {
-      await html5QrCode.stop();
-      html5QrCode.clear();
+  // スキャン開始（1回だけ）
+  startScanBtn.addEventListener("click", async () => {
+    if (!isCameraReady || !cameraId) {
+      alert("先にカメラを起動してください。");
+      return;
     }
 
-    html5QrCode = new Html5Qrcode("reader");
+    overlay.style.visibility = "visible";
+    overlay.textContent = "🔍 読み取り中...";
 
-    const cameras = await Html5Qrcode.getCameras();
-    if (cameras && cameras.length) {
-      const cameraId = cameras[0].id;
-
+    try {
       await html5QrCode.start(
         cameraId,
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }, // 正方形の読み取り枠
-        },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
-          // 成功時（1回だけ）
-          resultDiv.textContent = "読み取り結果: " + decodedText;
-          html5QrCode.stop();
-          scanning = false;
+          overlay.style.visibility = "hidden";
+          resultDiv.textContent = "✅ 読み取り結果: " + decodedText;
+          html5QrCode.stop(); // 一度読み取ったら停止
         },
-        (errorMessage) => {
-          // デバッグ用：無視してOK
-        }
+        (error) => {}
       );
-
-      resultDiv.textContent = "QRコードをかざしてください";
-    } else {
-      resultDiv.textContent = "カメラが見つかりません。";
-      scanning = false;
+    } catch (err) {
+      console.error("読み取りエラー:", err);
+      overlay.textContent = "⚠️ 読み取り失敗";
     }
-  } catch (err) {
-    console.error(err);
-    resultDiv.textContent = "エラーが発生しました: " + err;
-    scanning = false;
-  }
+  });
 });
