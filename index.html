@@ -2,43 +2,107 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>QRコードスキャン（1回読み取り）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR読み取りUI</title>
   <style>
     body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       font-family: sans-serif;
-      margin: 30px;
+      text-align: center;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
     }
-    #reader {
-      width: 300px;
-      height: 300px;
-      border: 2px solid #333;
-      border-radius: 10px;
-      overflow: hidden;
+    h1 {
+      background: #333;
+      color: white;
+      padding: 10px;
+      margin: 0;
+    }
+    #reader-container {
+      width: 90vw;
+      height: 90vw;
+      max-width: 400px;
+      max-height: 400px;
+      margin: 20px auto;
       position: relative;
     }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333;
+    #reader {
+      width: 100%;
+      height: 100%;
+      position: relative;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.4);
+      visibility: hidden;
+    }
+    #startScan {
+      font-size: 1.4em;
+      padding: 14px 28px;
+      margin: 10px auto 5px auto;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
+      display: block;
+      position: relative;
+      z-index: 10;
+    }
+    #startScan:hover {
+      background-color: #005ea2;
+    }
+    #startCamera {
+      font-size: 1.2em;
+      padding: 12px 24px;
+      margin: 0 auto 20px auto;
+      background-color: #00a859;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      position: relative;
+      z-index: 10;
+    }
+    #startCamera:hover {
+      background-color: #007a43;
+    }
+    #result {
+      font-size: 1.2em;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>QRコードスキャン</h2>
-  <div id="reader"></div>
-  <div id="result">まだ読み取っていません</div>
-  <button id="startButton">スキャン開始</button>
+  <h1>📷 QR読み取りUI（v20251029）</h1>
+
+  <div id="reader-container">
+    <div id="reader"></div>
+    <div id="overlay">🔍 読み取り中...</div>
+  </div>
+
+  <button id="startScan">📷 読み取り開始</button>
+  <button id="startCamera">📡 カメラ起動</button>
+  <div id="result"></div>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="script.js"></script>
+  <!-- main.js は defer で読ませるのが重要 -->
+  <script src="main.js?v=20251029" defer></script>
 </body>
 </html>
