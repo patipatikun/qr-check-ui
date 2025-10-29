@@ -1,64 +1,66 @@
-let dqr = null;
-let productqr = null;
 
-const dqrScanner = new Html5Qrcode("scanner-dqr");
-const productScanner = new Html5Qrcode("scanner-productqr");
 
-let isScanning = false; // 二重スキャン防止
-
-// 🎯 ボタン押下で読み取り開始（1回限定）
-function startLeftScanner() {
-  if (isScanning) return;
-  isScanning = true;
-
-  const qrboxSize = Math.min(window.innerWidth, 300); // 正方形枠
-  dqrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: qrboxSize, height: qrboxSize } },
-    qr => {
-      dqr = qr;
-      dqrScanner.stop();
-      isScanning = false;
-      document.getElementById("result").textContent = "1回目QR読み取り完了。次をスキャンしてください。";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR照合UI</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f4f4f4;
     }
-  ).catch(err => {
-    console.error("左スキャナー起動失敗:", err);
-    isScanning = false;
-  });
-}
-
-function startRightScanner() {
-  if (isScanning) return;
-  isScanning = true;
-
-  const qrboxSize = Math.min(window.innerWidth, 300);
-  productScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: qrboxSize, height: qrboxSize } },
-    qr => {
-      productqr = qr;
-      productScanner.stop();
-      isScanning = false;
-      checkMatch();
+    h1 {
+      background: #333;
+      color: white;
+      padding: 10px;
     }
-  ).catch(err => {
-    console.error("右スキャナー起動失敗:", err);
-    isScanning = false;
-  });
-}
+    .scanner-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin: 20px;
+    }
+    .scanner {
+      width: 45%;
+      min-width: 300px;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .ok { color: green; }
+    .ng { color: red; }
+  </style>
+</head>
+<body>
+  <h1>📦 QR照合UI</h1>
 
-function checkMatch() {
-  if (dqr && productqr) {
-    fetch("https://script.google.com/macros/s/AKfycbzAfRJoFs9hy0-jw8GcY0egwmjA9dlE6WSXCVdMOiJcs44DnBPHpGmFaEw6FD_ZyVE-LA/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `dp=${encodeURIComponent(dqr)}&productQr=${encodeURIComponent(productqr)}`
-    })
-      .then(res => res.text())
-      .then(result => {
-        const resultBox = document.getElementById("result");
-        resultBox.textContent = result;
-        resultBox.className = result.includes("OK") ? "ok" : "ng";
-      });
-  }
-}
+  <div class="scanner-container">
+    <div class="scanner">
+      <h3>製品貼付QR（1回目）</h3>
+      <div id="scanner-dqr"></div>
+    </div>
+    <div class="scanner">
+      <h3>出荷時QR（2回目）</h3>
+      <div id="scanner-productqr"></div>
+    </div>
+  </div>
+
+  <div id="result">QRをスキャンしてください</div>
+
+
+  <!-- ✅ ライブラリ → main.js の順で読み込む -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="main.js?v=20251028"></script>
+</body>
+</html>
+
+
+
